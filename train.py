@@ -43,7 +43,9 @@ def main():
     model.fit(X_res, y_res)
     
     # 5. Calibrate on the clean validation set (cv='prefit')
-    calibrated = CalibratedClassifierCV(estimator=model, cv='prefit', method='sigmoid')
+    # 5. Calibrate on the clean validation set using FrozenEstimator
+    from sklearn.frozen import FrozenEstimator
+    calibrated = CalibratedClassifierCV(estimator=FrozenEstimator(model), method='sigmoid')
     calibrated.fit(X_val, y_val)
     
     # 6. Find optimal threshold using F1 score on validation set

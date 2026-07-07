@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+data/creditcard.csv
+models/*.joblib
+output/
+*.log
+*.ipynb_checkpoints/

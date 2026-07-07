@@ -54,9 +54,8 @@ def main():
     f1s = [f1_score(y_val, (y_prob_val >= t).astype(int)) for t in thresholds]
     best_threshold = thresholds[np.argmax(f1s)]
     
-    # 7. SHAP Explainer MUST use the base XGBoost model, not the Calibrated wrapper
-    background = X_train.sample(n=100, random_state=42)
-    explainer = create_explainer(model, background, feature_names=X_train.columns.tolist())
+    # 7. SHAP Explainer (Using tree_path_dependent to avoid XGBoost bug)
+    explainer = create_explainer(model)
     
     # 8. Save artifacts
     save_artifacts(calibrated, scaler, explainer, best_threshold, path='models/')

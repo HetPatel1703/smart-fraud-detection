@@ -80,15 +80,12 @@ if len(filtered) > 0:
     trans_id = st.selectbox("Select a transaction (index)", filtered.index.tolist())
     trans = filtered.loc[trans_id]
     
-    # Check if this is a user mistake (negative amount) BEFORE checking for fraud
-    is_invalid_entry = trans['Amount'] < 0
-    
     # --- HACKATHON MOCK CUSTOMER DATA ---
     np.random.seed(trans_id) 
     mock_names = ["Emma Watson", "John Doe", "Aisha Khan", "Liam Chen", "Sophia Patel", "Jackson Smith"]
     customer_name = np.random.choice(mock_names)
     
-    # Safely calculate past average (prevent negative averages)
+    # Safely calculate past average
     safe_amount = abs(trans['Amount'])
     past_avg = max(15.0, safe_amount * np.random.uniform(0.3, 1.2))
     past_std = past_avg * np.random.uniform(0.1, 0.5)
@@ -99,14 +96,8 @@ if len(filtered) > 0:
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Cardholder Name", customer_name)
     m2.metric("Transaction Amount", f"${trans['Amount']:.2f}")
-    
-    # If invalid, probability doesn't matter
-    if is_invalid_entry:
-        m3.metric("Fraud Probability", "N/A")
-        m4.metric("Risk Decision", "⚠️ REJECTED (ERROR)")
-    else:
-        m3.metric("Fraud Probability", f"{trans['probability'] * 100:.2f}%")
-        m4.metric("Risk Decision", "🛑 BLOCKED" if trans['prediction'] == 1 else "✅ APPROVED")
+    m3.metric("Fraud Probability", f"{trans['probability'] * 100:.2f}%")
+    m4.metric("Risk Decision", "🛑 BLOCKED" if trans['prediction'] == 1 else "✅ APPROVED")
     
     h1, h2 = st.columns(2)
     h1.info(f"**Historical Average:** ${past_avg:.2f}")
@@ -143,14 +134,12 @@ if len(filtered) > 0:
     # --- UI: PLAIN ENGLISH REASONING ---
     st.markdown("### 🧠 Reasoning of Fraud")
     
-    # 1. HANDLE USER MISTAKES FIRST
-    if is_invalid_entry:
-        st.warning("**⚠️ Invalid Transaction Detected!**")
-        st.markdown("- ❌ **User Data Entry Error:** The transaction amount was submitted as a negative number. This is a system formatting mistake, not a fraud attempt. The system has automatically rejected this transaction and asked the user to correct the amount.")
-        
-    # 2. HANDLE REAL FRAUD
-    elif trans['prediction'] == 1:
+    if trans['prediction'] == 1:
         st.error("**Fraud Alert! The AI flagged this transaction for the following reasons:**")
+        
+        # Kept strictly as a fraud reason
+        if trans['Amount'] < 0:
+            st.markdown("- 🚨 **Invalid Amount:** Transaction amount is negative, which is a highly suspicious anomaly often caused by API tampering or script injections.")
         
         if trans['Amount'] > (past_avg + (3 * past_std)):
             st.markdown(f"- 🚨 **Unusual Amount (High SD):** This purchase is mathematically far outside the customer's normal habits. Their normal spend fluctuates by about ±${past_std:.2f}, making this ${trans['Amount']:.2f} charge highly suspicious.")
@@ -168,7 +157,6 @@ if len(filtered) > 0:
         if has_network_anomaly:
             st.markdown("- 🚨 **Anomalous System Checks:** The transaction failed our standard background safety checks (like device recognition or location verification), matching patterns we often see in fraudulent charges.")
             
-    # 3. HANDLE LEGITIMATE TRANSACTIONS
     else:
         st.success("**Legitimate Transaction. The AI approved this because:**")
         st.markdown("- ✅ **Normal Amount:** The purchase aligns with the customer's historical average and standard deviation.")
@@ -199,33 +187,29 @@ if len(filtered) > 0:
 
     # --- UI: ADVANCED GRAPH (CUSTOM BAR CHART) ---
     st.markdown("#### 🔬 Detailed Background Safety Checks")
+    st.write("This chart shows which specific safety checks triggered the fraud alert (Red) and which checks looked normal (Blue).")
     
-    if is_invalid_entry:
-        st.info("Mathematical background checks are skipped for invalid data entries.")
-    else:
-        st.write("This chart shows which specific safety checks triggered the fraud alert (Red) and which checks looked normal (Blue).")
-        
-        top_indices = np.argsort(np.abs(shap_vals_to_plot))[-10:]
-        top_vals = shap_vals_to_plot[top_indices]
-        top_names = [friendly_names[i] for i in top_indices]
-        
-        fig, ax = plt.subplots(figsize=(10, 6))
-        colors = ['#ff4b4b' if val > 0 else '#1f77b4' for val in top_vals]
-        
-        bars = ax.barh(top_names, top_vals, color=colors)
-        
-        ax.set_ylabel("Background Safety Checks Performed", fontsize=13, fontweight='bold', color='#333333')
-        ax.set_xlabel("← Looked Normal (Decreases Risk)       |       Looked Suspicious (Increases Risk) →", 
-                      fontsize=12, fontweight='bold', color='#333333')
-        
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.spines['left'].set_visible(False)
-        
-        ax.axvline(0, color='black', linewidth=1.5, linestyle='--')
-        plt.tight_layout()
-        st.pyplot(fig)
-        plt.close(fig)
+    top_indices = np.argsort(np.abs(shap_vals_to_plot))[-10:]
+    top_vals = shap_vals_to_plot[top_indices]
+    top_names = [friendly_names[i] for i in top_indices]
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    colors = ['#ff4b4b' if val > 0 else '#1f77b4' for val in top_vals]
+    
+    bars = ax.barh(top_names, top_vals, color=colors)
+    
+    ax.set_ylabel("Background Safety Checks Performed", fontsize=13, fontweight='bold', color='#333333')
+    ax.set_xlabel("← Looked Normal (Decreases Risk)       |       Looked Suspicious (Increases Risk) →", 
+                  fontsize=12, fontweight='bold', color='#333333')
+    
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    
+    ax.axvline(0, color='black', linewidth=1.5, linestyle='--')
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
 
 else:
     st.warning("No transactions match the filters.")

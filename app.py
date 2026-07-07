@@ -71,21 +71,43 @@ st.subheader("🔍 Transaction Explanation")
 if len(filtered) > 0:
     trans_id = st.selectbox("Select a transaction (index)", filtered.index.tolist())
     trans = filtered.loc[trans_id]
-    st.write(f"**Risk Score**: {trans['risk_score']} / 100")
-    st.write(f"**Prediction**: {'Fraud' if trans['prediction'] == 1 else 'Legitimate'}")
-    st.write(f"**Amount**: ${trans['Amount']:.2f}")
-    st.write(f"**Hour**: {int(trans['Hour'])}")
+    
+    # --- NEW: HACKATHON MOCK CUSTOMER DATA ---
+    # We use the transaction ID as a seed so the fake data stays consistent if you click away and come back
+    np.random.seed(trans_id) 
+    mock_names = ["Emma Watson", "John Doe", "Aisha Khan", "Liam Chen", "Sophia Patel", "Jackson Smith"]
+    customer_name = np.random.choice(mock_names)
+    past_avg = max(15.0, trans['Amount'] * np.random.uniform(0.3, 1.2)) # Fake past average
+    past_std = past_avg * np.random.uniform(0.1, 0.5) # Fake standard deviation
+    
+    # --- UI: CUSTOMER PROFILE DASHBOARD ---
+    st.markdown("### 👤 Customer & Transaction Profile")
+    
+    # Create 4 clean columns for the top metrics
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Cardholder Name", customer_name)
+    m2.metric("Transaction Amount", f"${trans['Amount']:.2f}")
+    m3.metric("Fraud Probability", f"{trans['probability'] * 100:.2f}%")
+    m4.metric("Risk Decision", "🛑 BLOCKED" if trans['prediction'] == 1 else "✅ APPROVED")
+    
+    # Create 2 columns for the historical context
+    h1, h2 = st.columns(2)
+    h1.info(f"**Historical Average:** ${past_avg:.2f}")
+    h2.warning(f"**Historical Std Dev:** ±${past_std:.2f}")
+    
+    st.divider() # Adds a nice visual line
+
+    # --- UI: SHAP EXPLANATION ---
+    st.markdown("### 🧠 AI Explanation (Why is this suspicious?)")
     
     X_single = pd.DataFrame([trans[feature_cols].values], columns=feature_cols)
-    
-    # Calculate SHAP values
     shap_values = explainer.shap_values(X_single)
     
-    # XGBoost returns standard numpy arrays for binary classification in recent SHAP versions
     shap_vals_to_plot = shap_values[0] if isinstance(shap_values, list) else shap_values[0]
     base_val_to_plot = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
     
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # Waterfall chart
+    fig, ax = plt.subplots(figsize=(10, 5))
     shap.waterfall_plot(
         shap.Explanation(
             values=shap_vals_to_plot,
@@ -98,16 +120,5 @@ if len(filtered) > 0:
     )
     st.pyplot(fig)
     plt.close(fig)
-    
-    st.subheader("Top Contributing Features")
-    shap_abs = np.abs(shap_vals_to_plot)
-    feat_imp = pd.DataFrame({
-        'Feature': feature_cols,
-        'SHAP': shap_vals_to_plot,
-        'Abs_SHAP': shap_abs
-    }).sort_values('Abs_SHAP', ascending=False).head(10)
-    
-    fig2 = px.bar(feat_imp, x='Abs_SHAP', y='Feature', orientation='h', title='Top 10 Features (absolute SHAP)')
-    st.plotly_chart(fig2, use_container_width=True)
 else:
     st.warning("No transactions match the filters.")

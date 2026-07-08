@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import joblib
+
 import plotly.express as px
 import matplotlib.pyplot as plt
 import shap
@@ -13,8 +15,13 @@ st.set_page_config(layout="wide", page_title="Fraud Investigation Dashboard")
 
 @st.cache_resource
 def load_resources():
-    df = load_data('data/creditcard.csv')
-    model, scaler, explainer, threshold = load_artifacts('models/')
+    # Update this line to use the new lightweight demo file
+    df = load_data('data/demo_creditcard.csv') 
+    
+    model = joblib.load('models/model.joblib')
+    scaler = joblib.load('models/scaler.joblib')
+    explainer = joblib.load('models/explainer.joblib')
+    threshold = joblib.load('models/threshold.joblib')
     return df, model, scaler, explainer, threshold
 
 df, model, scaler, explainer, threshold = load_resources()

@@ -69,7 +69,7 @@ filtered = scored_df[
 if pred_filter != "All":
     filtered = filtered[filtered['prediction'] == (1 if pred_filter == "Fraud" else 0)]
 
-st.title("🕵️ Smart Credit Card Fraud Investigation")
+st.title("Smart Credit Card Fraud Investigation")
 st.markdown("**Explainable AI for fraud detection**")
 
 col1, col2, col3 = st.columns(3)
@@ -77,12 +77,12 @@ col1.metric("Total Transactions", len(filtered))
 col2.metric("Fraudulent (predicted)", filtered['prediction'].sum())
 col3.metric("Average Risk Score", f"{filtered['risk_score'].mean():.1f}")
 
-st.subheader("🏆 Top Risky Transactions")
+st.subheader("Top Risky Transactions")
 top_n = st.slider("Number of top transactions to show", 5, 50, 10)
 top_risky = filtered.nlargest(top_n, 'risk_score')[['Time', 'Amount', 'risk_score', 'prediction', 'Hour'] + [f'V{i}' for i in range(1, 29)]]
 st.dataframe(top_risky, use_container_width=True)
 
-st.subheader("🔍 Transaction Explanation")
+st.subheader("Transaction Explanation")
 if len(filtered) > 0:
     trans_id = st.selectbox("Select a transaction (index)", filtered.index.tolist())
     trans = filtered.loc[trans_id]
@@ -98,7 +98,7 @@ if len(filtered) > 0:
     past_std = past_avg * np.random.uniform(0.1, 0.5)
     
     # --- UI: CUSTOMER PROFILE DASHBOARD ---
-    st.markdown("### 👤 Customer & Transaction Profile")
+    st.markdown("### Customer & Transaction Profile")
     
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Cardholder Name", customer_name)
@@ -139,17 +139,17 @@ if len(filtered) > 0:
             friendly_names.append(col)
 
     # --- UI: PLAIN ENGLISH REASONING ---
-    st.markdown("### 🧠 Reasoning of Fraud")
+    st.markdown("### Reasoning of Fraud")
     
     if trans['prediction'] == 1:
-        st.error("**Fraud Alert! The AI flagged this transaction for the following reasons:**")
+        st.error("**Fraud Alert! The system flagged this transaction for the following reasons:**")
         
         # Kept strictly as a fraud reason
         if trans['Amount'] < 0:
-            st.markdown("- 🚨 **Invalid Amount:** Transaction amount is negative, which is a highly suspicious anomaly often caused by API tampering or script injections.")
+            st.markdown("- 🛑 **Invalid Amount:** Transaction amount is negative, which is a highly suspicious anomaly often caused by API tampering or script injections.")
         
         if trans['Amount'] > (past_avg + (3 * past_std)):
-            st.markdown(f"- 🚨 **Unusual Amount (High SD):** This purchase is mathematically far outside the customer's normal habits. Their normal spend fluctuates by about ±${past_std:.2f}, making this ${trans['Amount']:.2f} charge highly suspicious.")
+            st.markdown(f"- 🛑 **Unusual Amount (High SD):** This purchase is mathematically far outside the customer's normal habits. Their normal spend fluctuates by about ±${past_std:.2f}, making this ${trans['Amount']:.2f} charge highly suspicious.")
             
         top_indices = np.argsort(np.abs(shap_vals_to_plot))[-5:]
         has_network_anomaly = False
@@ -157,22 +157,22 @@ if len(filtered) > 0:
         for idx in reversed(top_indices):
             if shap_vals_to_plot[idx] > 0: 
                 if feature_cols[idx] == 'Hour':
-                    st.markdown("- 🚨 **Suspicious Timing:** This occurred at a highly unusual time of day.")
+                    st.markdown("- 🛑 **Suspicious Timing:** This occurred at a highly unusual time of day.")
                 elif feature_cols[idx].startswith('V'):
                     has_network_anomaly = True
                     
         if has_network_anomaly:
-            st.markdown("- 🚨 **Anomalous System Checks:** The transaction failed our standard background safety checks (like device recognition or location verification), matching patterns we often see in fraudulent charges.")
+            st.markdown("- 🛑 **Anomalous System Checks:** The transaction failed our standard background safety checks (like device recognition or location verification), matching patterns we often see in fraudulent charges.")
             
     else:
-        st.success("**Legitimate Transaction. The AI approved this because:**")
+        st.success("**Legitimate Transaction. The system approved this because:**")
         st.markdown("- ✅ **Normal Amount:** The purchase aligns with the customer's historical average and standard deviation.")
         st.markdown("- ✅ **Passed Safety Checks:** All background system checks (device, location, etc.) look completely normal.")
 
     st.divider()
 
     # --- UI: SYSTEM METRICS TABLE ---
-    st.markdown("### 📊 System Performance Metrics")
+    st.markdown("### System Performance Metrics")
     st.write("For transparency, here is the accuracy of our AI model based on our testing data.")
 
     metrics_data = {
@@ -193,7 +193,7 @@ if len(filtered) > 0:
     st.divider()
 
     # --- UI: ADVANCED GRAPH (CUSTOM BAR CHART) ---
-    st.markdown("#### 🔬 Detailed Background Safety Checks")
+    st.markdown("#### Detailed Background Safety Checks")
     st.write("This chart shows which specific safety checks triggered the fraud alert (Red) and which checks looked normal (Blue).")
     
     top_indices = np.argsort(np.abs(shap_vals_to_plot))[-10:]

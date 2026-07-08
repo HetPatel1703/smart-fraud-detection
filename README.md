@@ -1,11 +1,12 @@
-# 🕵️‍♂️ Smart Credit Card Fraud Investigation 
+<<<<<<< HEAD
+# Smart Credit Card Fraud Investigation 
 **MSoC 2026 Hackathon** | **Developed by: Het Pethani,Khushi Khakhiwala (Team: Neural Sparkers)**
 
-**🌍 Live Deployment Link:** [View the Live Investigator Dashboard Here](https://hetpatel1703-smart-fraud-detection-app-906nlv.streamlit.app/)
+** Live Deployment Link:** [View the Live Investigator Dashboard Here](https://hetpatel1703-smart-fraud-detection-app-906nlv.streamlit.app/)
 
 ---
 
-## 🛑 1. Problem Statement
+## 1. Problem Statement
 
 Global card payment networks process hundreds of billions of transactions every year, and a small but relentless fraction of those are fraudulent. Financial institutions currently face two major problems:
 1. **Legacy Systems:** Traditional rule-based systems (e.g., "block any transaction over $5,000") are easily bypassed by modern hackers and result in thousands of legitimate customers getting their cards falsely declined.
@@ -15,7 +16,7 @@ There is a critical need for a system that is not only highly accurate at detect
 
 ---
 
-## 💡 2. Solution Approach
+## 2. Solution Approach
 
 This project is a next-generation **Explainable AI Fraud Detection System**. It replaces human guesswork with dynamic machine learning and translates complex mathematics into a plain-English dashboard.
 
@@ -28,7 +29,7 @@ This project is a next-generation **Explainable AI Fraud Detection System**. It 
 
 ---
 
-## 🛠️ 3. Technology Stack
+## 3. Technology Stack
 
 This project was built entirely in Python, focusing on high-speed inference and clear data visualization:
 
@@ -42,7 +43,41 @@ This project was built entirely in Python, focusing on high-speed inference and 
 
 ---
 
-## 📊 4. Dataset Sources
+## 4. Project Structure
+
+```text
+smart-fraud-detection-main/
+├── app.py                      # Main Streamlit dashboard
+├── train.py                    # Model training pipeline
+├── make_demo.py                # Creates demo dataset for testing
+├── requirements.txt            # Project dependencies
+├── README.md                   # Project documentation
+├── RESULTS.md                  # Model evaluation results
+├── .gitignore                  # Git ignored files
+│
+├── data/
+│   ├── creditcard.csv          # Original credit card fraud dataset
+│   └── demo_creditcard.csv     # Sample dataset for demo/testing
+│
+├── models/
+│   ├── model.joblib            # Trained XGBoost fraud detection model
+│   ├── scaler.joblib           # Feature scaler
+│   ├── explainer.joblib        # SHAP explainer object
+│   └── threshold.joblib        # Optimal fraud decision threshold
+│
+├── src/
+│   ├── __init__.py
+│   ├── data_loader.py          # Data loading and preprocessing
+│   ├── feature_engineering.py  # Feature engineering and scaling
+│   ├── model_trainer.py        # Model training and artifact saving
+│   ├── evaluator.py            # Model evaluation metrics
+│   ├── explainer.py            # SHAP explainability generation
+│   └── utils.py                # Helper utility functions
+│
+└── .venv/                      # Python virtual environment
+```
+
+## 5. Dataset Sources
 
 * **Primary Dataset:** Kaggle Credit Card Fraud Detection Dataset
     * **Source Link:** [https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
@@ -52,7 +87,7 @@ This project was built entirely in Python, focusing on high-speed inference and 
 
 ---
 
-## 🚀 5. Setup Instructions
+## 6. Setup Instructions
 
 To run this project locally on your own machine, follow these steps:
 
@@ -69,3 +104,7 @@ source venv/bin/activate
 # For Windows:
 python -m venv venv
 .\venv\Scripts\activate
+=======
+# Smart-Credit-Card-Fraud-Investigation-Project
+An intelligent credit card fraud detection system that predicts fraudulent transactions and explains why they are suspicious using Explainable AI, XGBoost, SHAP, and an interactive Streamlit dashboard.
+>>>>>>> 1ff2ea6938783b0c089bfd539cad2d16209126cd

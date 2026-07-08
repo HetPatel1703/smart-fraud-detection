@@ -1,5 +1,5 @@
 # 🕵️‍♂️ Smart Credit Card Fraud Investigation 
-**MSoC 2026 Hackathon** | **Developed by: Het Pethani (Team: Neural Sparkers)**
+**MSoC 2026 Hackathon** | **Developed by: Het Pethani,Khushi Khakhiwala (Team: Neural Sparkers)**
 
 **🌍 Live Deployment Link:** [View the Live Investigator Dashboard Here](https://hetpatel1703-smart-fraud-detection-app-906nlv.streamlit.app/)
 

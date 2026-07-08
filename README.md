@@ -1,54 +1,71 @@
 # 🕵️‍♂️ Smart Credit Card Fraud Investigation 
-**MSoC 2026 Hackathon | Team: Neural Sparkers**
+**MSoC 2026 Hackathon** | **Developed by: Het Pethani (Team: Neural Sparkers)**
 
-Global card payment networks process hundreds of billions of transactions every year, and a small but relentless fraction of those are fraudulent. Legacy rule-based systems (like "block anything over $5,000") are easy for hackers to bypass and end up blocking legitimate customers.
-
-This project is a next-generation **Explainable AI Fraud Detection System**. It doesn't just guess if a transaction is fraud—it mathematically proves it and translates the reasoning into a plain-English dashboard for human investigators.
+**🌍 Live Deployment Link:** [View the Live Investigator Dashboard Here](https://hetpatel1703-smart-fraud-detection-app-906nlv.streamlit.app/)
 
 ---
 
-## ✨ Key Features
+## 🛑 1. Problem Statement
 
-* **🧠 High-Accuracy AI Engine:** Powered by XGBoost, the system effectively catches subtle fraud patterns without generating excessive false alarms.
-* **🗣️ Plain-English Explainability:** Instead of returning a confusing "Black Box" probability, the AI uses SHAP values to explain *exactly* why a transaction was flagged (e.g., "Anomalous System Checks" or "Suspicious Timing").
-* **📊 Investigator Dashboard:** A beautiful, intuitive Streamlit web app that displays simulated customer profiles, historical averages, and custom-built, text-free risk charts.
-* **⚙️ Dynamic AI Thresholding:** Instead of guessing a flat "50% = fraud" rule, the pipeline dynamically tests 50 different probability cutoffs during training to find the exact mathematical sweet spot (maximizing the F1-Score).
-* **🛑 Built-In Guardrails:** The system automatically intercepts user data-entry errors (like negative transaction amounts) before they even reach the AI, preventing false data from polluting the model.
+Global card payment networks process hundreds of billions of transactions every year, and a small but relentless fraction of those are fraudulent. Financial institutions currently face two major problems:
+1. **Legacy Systems:** Traditional rule-based systems (e.g., "block any transaction over $5,000") are easily bypassed by modern hackers and result in thousands of legitimate customers getting their cards falsely declined.
+2. **The "Black Box" AI Problem:** While modern machine learning models are highly accurate at catching fraud, they operate as a "black box." Due to strict financial regulations (like GDPR and PSD2), banks cannot block a customer's card without being able to explain *why*. 
 
----
-
-## 📈 System Performance Metrics
-
-Because fraud only happens in about **0.17%** of transactions, standard "Accuracy" is a useless metric. We optimized this system for **Precision and Recall**, achieving the following results on our testing data:
-
-| Metric | Score | What it means (Plain English) |
-| :--- | :--- | :--- |
-| **ROC-AUC** | **98.04%** | The overall ability of the model to distinguish between a fraudster and a normal customer (100% is perfect). |
-| **Precision** | **93.10%** | When our system blocks a card for fraud, we are correct 93.10% of the time (extremely low false alarms). |
-| **Recall** | **72.00%** | Out of all the *actual* fraud attacks that occurred, we successfully caught 72%. |
-| **F1-Score** | **81.20%** | The balanced mathematical score combining both Recall and Precision. |
-
-*Note: The model inference latency is completely optimized to score single transactions in under 200ms on a standard CPU.*
+There is a critical need for a system that is not only highly accurate at detecting fraud but also completely transparent and explainable to human fraud investigators.
 
 ---
 
-## 🛠️ How It Works (Our Approach)
+## 💡 2. Solution Approach
 
-1. **Data Preprocessing & SMOTE:** Credit card datasets are highly imbalanced. We use a technique called **SMOTE** (Synthetic Minority Oversampling) strictly on the training data so our AI has enough examples to learn what a hacker looks like.
-2. **XGBoost Training (`train.py`):** We train a highly efficient gradient-boosted tree model. It is calibrated using Scikit-Learn's `CalibratedClassifierCV` (with a frozen estimator lock) to ensure the probability outputs (0% to 100%) are accurate.
-3. **SHAP Explainability (`explainer.py`):** We use SHAP (`TreeExplainer`) to break down the exact weight of every single variable. We map the dataset's hidden PCA variables (`V1-V28`) to realistic banking terms like *"Location Safety Check"* and *"Device Recognition"* for the UI.
-4. **The UI (`app.py`):** A Streamlit dashboard pulls the saved models and SHAP explainer to render interactive, beginner-friendly warnings and clean bar charts for human investigators.
+This project is a next-generation **Explainable AI Fraud Detection System**. It replaces human guesswork with dynamic machine learning and translates complex mathematics into a plain-English dashboard.
+
+* **Data Balancing (SMOTE):** Because fraud only occurs in ~0.17% of transactions, we utilized Synthetic Minority Oversampling Technique (SMOTE) on the training data to ensure the AI could actually learn the minority class patterns without overfitting.
+* **Algorithmic Engine:** We trained a lightweight, high-speed **XGBoost Classifier**. It is calibrated using Scikit-Learn's `CalibratedClassifierCV` to output true probabilities rather than raw confidence scores.
+* **Dynamic Threshold Optimization:** Instead of guessing a flat "50% = fraud" rule, our pipeline runs a simulation across 50 different probability cutoffs during training. It automatically selects the exact mathematical threshold that maximizes the **F1-Score**, perfectly balancing fraud capture (Recall) with customer experience (Precision).
+* **SHAP Explainability:** We integrated `TreeExplainer` from the SHAP library to break down the exact mathematical contribution of every single variable.
+* **Investigator UX:** We mapped the dataset's hidden PCA variables (`V1-V28`) to realistic banking terms (e.g., *"Location Safety Check"*, *"Device Recognition"*) and built a Streamlit UI that translates the SHAP math into clean bar charts and plain-English warnings for human investigators.
+* **System Guardrails:** The system logic includes custom intercepts for user-errors (e.g., negative transaction amounts), filtering them out as "Invalid Entries" before they can pollute the ML model predictions.
 
 ---
 
-## 🚀 How to Run the Project
+## 🛠️ 3. Technology Stack
 
-You don't need a data science degree to run this! Just follow these simple terminal commands.
+This project was built entirely in Python, focusing on high-speed inference and clear data visualization:
 
-### 1. Set Up Your Environment
-First, clone this repository and navigate into the folder. It is highly recommended to use a virtual environment so you don't conflict with other Python projects on your computer.
+* **Frontend / UI:** [Streamlit](https://streamlit.io/) (for the interactive investigator dashboard)
+* **Machine Learning Engine:** [XGBoost](https://xgboost.readthedocs.io/) (Gradient Boosted Decision Trees)
+* **Explainable AI:** [SHAP](https://shap.readthedocs.io/) (SHapley Additive exPlanations)
+* **Data Processing:** Pandas, NumPy
+* **Model Pipeline & Metrics:** Scikit-Learn, Imbalanced-Learn (SMOTE)
+* **Data Visualization:** Matplotlib
+* **Deployment:** Streamlit Community Cloud
 
-**Mac/Linux:**
+---
+
+## 📊 4. Dataset Sources
+
+* **Primary Dataset:** Kaggle Credit Card Fraud Detection Dataset
+    * **Source Link:** [https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
+    * **Description:** This dataset contains transactions made by credit cards in September 2013 by European cardholders. It presents transactions that occurred over two days, where there are 492 frauds out of 284,807 transactions (highly unbalanced).
+    * **Note on Features:** Due to confidentiality issues, the original features (V1-V28) are numerical principal components obtained via PCA. The only unaltered features are 'Time' and 'Amount'.
+* **Deployment Dataset (`demo_creditcard.csv`):** Because the original dataset is over 150MB (exceeding GitHub's limits), a lightweight stratified sample containing all 492 original fraud cases and 1,000 legitimate transactions was generated locally and uploaded to power the live cloud deployment.
+
+---
+
+## 🚀 5. Setup Instructions
+
+To run this project locally on your own machine, follow these steps:
+
+### Step 1: Clone and Set Up Environment
+It is highly recommended to use a virtual environment to prevent dependency conflicts.
 ```bash
+git clone [https://github.com/hetpatel1703/smart-fraud-detection.git](https://github.com/hetpatel1703/smart-fraud-detection.git)
+cd smart-fraud-detection
+
+# For Mac/Linux:
 python3 -m venv venv
 source venv/bin/activate
+
+# For Windows:
+python -m venv venv
+.\venv\Scripts\activate
